@@ -15,6 +15,18 @@
 *.exe
 *.out
 *.app
+*.elf
+*.bin
+*.hex
+*.eep
+
+# Others
+.*.swp
+*.d
+*.lst
+*.lss
+*.map
+tags
 
 # Eagle CAD
 *.b#?
