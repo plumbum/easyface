@@ -28,8 +28,8 @@
 #include <util/delay.h>
 
 #include "helpers.h"
+#include "timer.h"
 #include "uart.h"
-
 #include "lcd.h"
 
 int main(void)
@@ -43,6 +43,8 @@ int main(void)
 #endif
 
     SET_DDR();
+
+    timerInit();
 
     lcdInit();
     lcdBackLight(1);
@@ -61,20 +63,19 @@ int main(void)
     uartPuts("Hello world!\r\n");
     uartPuts("Hello\r\n");
 
-    /*
-    if(UCSR0A & (1<<TXC0)) lcdPutc('1'); else lcdPutc('0');
-    if(UCSR0A & (1<<RXC0)) lcdPutc('1'); else lcdPutc('0');
-    if(UCSR0A & (1<<UDRE0)) lcdPutc('1'); else lcdPutc('0');
-    */
-    /*
-    while(!(UCSR0A & (1<<TXC0)))
+    int cnt = 0;
+    char str[32];
+    for(;;)
     {
         wdr();
+        itoa(cnt++, str);
+        uartPuts(str);
+        uartPuts(" : ");
+        itoa(timer, str);
+        uartPuts(str);
+        uartPuts("\r\n");
+        _delay_ms(500);
     }
-    PIN_CLR(DE);
-    lcdPutc('1');
-    */
-
 
     for(;;)
     {

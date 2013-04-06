@@ -75,6 +75,7 @@ SRC += helpers.c
 SRC += uart.c
 SRC += fifo.c
 SRC += lcd.c
+SRC += timer.c
 
 
 # If there is more than one source file, append them above, or modify and

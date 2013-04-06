@@ -24,6 +24,14 @@
 void delay_ms(unsigned int ms);
 void ERROR(uint8_t no, uint8_t code);
 
+uint16_t fcrc16i(uint16_t crc16, uint8_t data);
+uint16_t fcrc16(const uint8_t *buffer, uint16_t buffer_length);
+
+char* uitoa(uint32_t val, char* dest);
+char* itoa(int32_t val, char* dest);
+char* uitox(uint32_t val, char* dest, int digits);
+int numericLength(int32_t v);
+
 #endif /* _HELPERS_H_ */
 
 
