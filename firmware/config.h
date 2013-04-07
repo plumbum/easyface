@@ -34,27 +34,20 @@
 
 #define _PIN_SET(port, bit) do { *(volatile uint8_t*)((&port)+2) |=  (1<<(bit)); } while(0)
 #define PIN_SET(x) _PIN_SET(x)
+
 #define _PIN_CLR(port, bit) do { *(volatile uint8_t*)((&port)+2) &= ~(1<<(bit)); } while(0)
 #define PIN_CLR(x) _PIN_CLR(x)
 
+#define _PIN_TGL(port, bit) do { *(volatile uint8_t*)((&port)+2) ^= (1<<(bit)); } while(0)
+#define PIN_TGL(x) _PIN_TGL(x)
+
 #define _PIN_OUT(port, bit) do { *(volatile uint8_t*)((&port)+1) |=  (1<<(bit)); } while(0)
 #define PIN_OUT(x) _PIN_OUT(x)
+
 #define _PIN_IN(port, bit) do { *(volatile uint8_t*)((&port)+1) &= ~(1<<(bit)); } while(0)
 #define PIN_IN(x) _PIN_IN(x)
 
 
-
-#define _VAR_PIN_SET(port, bit) do { _##port[1] |=  (1<<(bit)); } while(0)
-#define VAR_PIN_SET(x) _VAR_PIN_SET(x)
-
-#define _VAR_PIN_CLR(port, bit) do { _##port[1] &= ~(1<<(bit)); } while(0)
-#define VAR_PIN_CLR(x) _VAR_PIN_CLR(x)
-
-#define _VAR_PIN_OUT(port, bit) do { _##port[0] |=  (1<<(bit)); } while(0)
-#define VAR_PIN_OUT(x) _VAR_PIN_OUT(x)
-
-#define _VAR_PIN_IN(port, bit)  do { _##port[0] &= ~(1<<(bit)); } while(0)
-#define VAR_PIN_IN(x) _VAR_PIN_IN(x)
 
 /*
  * Pinout configuration
@@ -80,6 +73,8 @@
 #define LCD_D7      PIND, PD5
 
 #define LIGHT       PINC, PC3
+#define EXT6        PINC, PC2
+#define EXT8        PINC, PC1
 
 
 inline static void SET_DDR(void)
@@ -99,6 +94,11 @@ inline static void SET_DDR(void)
     PIN_OUT(LCD_E);
     PIN_OUT(LCD_RS);
     PIN_OUT(LCD_WR);
+
+    PIN_CLR(EXT6);
+    PIN_OUT(EXT6);
+    PIN_CLR(EXT8);
+    PIN_OUT(EXT8);
     /*
     uint8_t _PINB[2] = {0, 0xFF};
     uint8_t _PINC[2] = {0, 0xFF};

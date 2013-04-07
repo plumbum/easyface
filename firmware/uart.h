@@ -35,6 +35,11 @@
 #define UART230400 UARTN(230400)
 #define UART460800 UARTN(460800)
 
+typedef struct uart_flags_s {
+    volatile uint8_t tx:1;
+} uart_flags_t;
+
+extern uart_flags_t uartFlags;
 
 // Functions
 #define uartSTATE ( UCSRA & (1<<RXC) )

@@ -26,8 +26,12 @@
 fifo_struct_t rx;
 fifo_struct_t tx;
 
+uart_flags_t uartFlags;
+
 void uartInit(uint16_t baud)
 {
+    uartFlags.tx = 0;
+
     fifoInit(&rx);
     fifoInit(&tx);
 
@@ -103,6 +107,7 @@ ISR(USART_TX_vect)
     if(fifoEmpty(&tx))
     {
         PIN_CLR(DE);
+        uartFlags.tx = 0;
     }
     UCSR0B &= ~(1<<TXCIE0);
 }
@@ -116,6 +121,7 @@ void uartPutTx(uint8_t data)
 {
     if(fifoEmpty(&tx) && (UCSR0A & (1<<UDRE0)))
     { // If can - write direct to USART
+        uartFlags.tx = 1;
         PIN_SET(DE);
         UDR0 = data;
         UCSR0B |= (1<<UDRIE0);
@@ -125,16 +131,6 @@ void uartPutTx(uint8_t data)
         while(fifoFull(&tx))
             wdr(); // Wait for space in buffer
         fifoPush(&tx, data);
-    }
-}
-
-char uartPutDone(void)
-{
-    if(fifoEmpty(&tx) && (UCSR0A & (1<<TXC0)))
-    {
-        return 1;
-    } else {
-        return 0;
     }
 }
 
