@@ -3,7 +3,8 @@
 
 #include "config.h"
 
-extern uint32_t timer;
+typedef uint16_t systimer_t;
+extern volatile systimer_t systimer;
 
 void timerInit(void);
 

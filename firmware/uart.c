@@ -71,6 +71,18 @@ char uartGetReady(void)
     return !fifoEmpty(&rx);
 }
 
+int8_t uartWaitRxTimeout(uint16_t timeout_ms)
+{
+    systimer_t timestampt = systimer;
+    while(fifoEmpty(&rx))
+    {
+        wdr();
+        if((uint16_t)(systimer - timestampt) > timeout_ms)
+            return UART_TIMEOUT;
+    }
+    return UART_OK;
+}
+
 int16_t uartGetRx(void)
 {
     int16_t data;
@@ -82,16 +94,11 @@ int16_t uartGetRx(void)
     return data;
 }
 
-int16_t uartGetRxTimeout(uint32_t timeout_ms)
+int16_t uartGetRxTimeout(uint16_t timeout_ms)
 {
-    uint32_t timestampt = timer;
     int16_t data;
-    while(fifoEmpty(&rx))
-    {
-        wdr();
-        if((timer - timestampt) > timeout_ms)
-            return UART_TIMEOUT;
-    }
+    if(uartWaitRxTimeout(timeout_ms) == UART_TIMEOUT)
+        return UART_TIMEOUT;
     cli();
     data = fifoPop(&rx);
     sei();

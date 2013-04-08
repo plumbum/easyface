@@ -1,4 +1,4 @@
-#include "timer.h"
+#include "systimer.h"
 
 #include <avr/interrupt.h>
 
@@ -28,17 +28,17 @@
 #error Invalid TIMER_DIVIDER
 #endif
 
-uint32_t timer;
+extern volatile systimer_t systimer;
 
 ISR(TIMER2_COMPA_vect)
 {
     PIN_TGL(EXT8);
-    timer++;
+    systimer++;
 }
 
 void timerInit(void)
 {
-    timer = 0;
+    systimer = 0;
 
     OCR2A = TIMER_COEF;
     TCCR2A = (2<<WGM00);

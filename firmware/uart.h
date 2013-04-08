@@ -21,7 +21,8 @@
 
 #include "config.h"
 
-#define UART_TIMEOUT (-1)
+#define UART_OK         (0)
+#define UART_TIMEOUT    (-1)
 
 // UART constant
 #define UARTN(x) (uint16_t)((F_CPU)/((x)*16l)-1)
