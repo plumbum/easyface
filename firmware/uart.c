@@ -23,6 +23,8 @@
 
 #include "fifo.h"
 
+#include "timer.h"
+
 fifo_struct_t rx;
 fifo_struct_t tx;
 
@@ -69,9 +71,9 @@ char uartGetReady(void)
     return !fifoEmpty(&rx);
 }
 
-uint8_t uartGetRx(void)
+int16_t uartGetRx(void)
 {
-    char data;
+    int16_t data;
     while(fifoEmpty(&rx))
         wdr();
     cli();
@@ -80,7 +82,23 @@ uint8_t uartGetRx(void)
     return data;
 }
 
-uint8_t uartGetTopRx(void)
+int16_t uartGetRxTimeout(uint32_t timeout_ms)
+{
+    uint32_t timestampt = timer;
+    int16_t data;
+    while(fifoEmpty(&rx))
+    {
+        wdr();
+        if((timer - timestampt) > timeout_ms)
+            return UART_TIMEOUT;
+    }
+    cli();
+    data = fifoPop(&rx);
+    sei();
+    return data;
+}
+
+int16_t uartGetTopRx(void)
 {
     while(fifoEmpty(&rx))
         wdr();

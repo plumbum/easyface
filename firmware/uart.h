@@ -21,6 +21,8 @@
 
 #include "config.h"
 
+#define UART_TIMEOUT (-1)
+
 // UART constant
 #define UARTN(x) (uint16_t)((F_CPU)/((x)*16l)-1)
 
@@ -47,8 +49,8 @@ extern uart_flags_t uartFlags;
 void uartInit(uint16_t baud);
 
 char uartGetReady(void);
-uint8_t uartGetRx(void);
-uint8_t uartGetTopRx(void);
+int16_t uartGetRx(void);
+int16_t uartGetTopRx(void);
 
 
 char uartTxFull(void);
