@@ -1,5 +1,5 @@
-#ifndef _TIMER_H_
-#define _TIMER_H_
+#ifndef _SYSTIMER_H_
+#define _SYSTIMER_H_
 
 #include "config.h"
 
@@ -8,5 +8,5 @@ extern volatile systimer_t systimer;
 
 void timerInit(void);
 
-#endif /* _TIMER_H_ */
+#endif /* _SYSTIMER_H_ */
 

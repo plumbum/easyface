@@ -53,6 +53,7 @@ char uartGetReady(void);
 int16_t uartGetRx(void);
 int16_t uartGetTopRx(void);
 
+int16_t uartGetRxTimeout(uint16_t timeout_ms);
 
 char uartTxFull(void);
 void uartPutTx(uint8_t data);

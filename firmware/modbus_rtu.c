@@ -1,17 +1,47 @@
 #include "modbus_rtu.h"
 
-#include <ch.h>
-#include <hal.h>
-
-#include "chprintf.h"
+#include "uart.h"
 
 uint16_t fcrc16i(uint16_t crc16, uint8_t data);
 
 int modbusRegisterResponce(BaseChannel* chan, uint8_t devid, uint8_t funcno, int32_t regaddr, int32_t datalen);
 int modbusReadRegister(BaseChannel* chan, uint8_t devid, uint8_t funcno, uint16_t* values, uint16_t len);
 
-#define VALUES_SIZE 16
-#define MODBUS_TIMEOUT MS2ST(5) 
+
+void modbusInit(modbus_state_t* mb, uint8_t device_id, systimer_t timeout)
+{
+    mb->done = 0;
+    mb->crc = 0xFFFF;
+    mb->timestamp = systimer;
+    mb->device_id = device_id;
+    mb->timeout = timeout;
+    mb->mb_state = mstWait;
+}
+
+char modbusProcess(modbus_state_t* mb)
+{
+    if(!uartGetReady()) // No data
+    {
+        if((uint16_t)(mb->systimer - mb->timestamp) > mb->timeout)
+        {
+            // Timeout -> reset state machine
+            mb->mb_state = mstWait;
+            mb->timestamp = systimer;
+            return 0;
+        } else {
+            return 0;
+        }
+    }
+
+    uint8_t c;
+    c = uartGetRx();
+
+    switch(mb->mb_state)
+    {
+        case mstWait:
+            break;
+
+}
 
 static WORKING_AREA(modbus_thd_wa, 512);
 static msg_t modbus_thd(void *arg)

@@ -75,7 +75,7 @@ int8_t uartWaitRxTimeout(uint16_t timeout_ms)
 {
     systimer_t timestampt = systimer;
     while(fifoEmpty(&rx))
-    {
+    { 
         wdr();
         if((uint16_t)(systimer - timestampt) > timeout_ms)
             return UART_TIMEOUT;
