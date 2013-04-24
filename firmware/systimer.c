@@ -28,7 +28,7 @@
 #error Invalid TIMER_DIVIDER
 #endif
 
-extern volatile systimer_t systimer;
+volatile systimer_t systimer;
 
 ISR(TIMER2_COMPA_vect)
 {

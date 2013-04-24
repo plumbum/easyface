@@ -23,7 +23,7 @@
 
 #include "fifo.h"
 
-#include "timer.h"
+#include "systimer.h"
 
 fifo_struct_t rx;
 fifo_struct_t tx;

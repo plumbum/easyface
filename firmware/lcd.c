@@ -106,6 +106,7 @@ static void lcdWriteData(uint8_t x)
     if(x & (1<<7)) PIN_SET(LCD_D7); else PIN_CLR(LCD_D7);
 }
 
+/*
 static uint8_t lcdReadData(void)
 {
     uint8_t r = 0;
@@ -119,6 +120,7 @@ static uint8_t lcdReadData(void)
     if(PIN(LCD_D7)) r |= (1<<7);
     return r;
 }
+*/
 
 #define CMD_CLEAN { LCD_GPIO &= ~(LCD_RS | LCD_E | LCD_DMASK); }
 

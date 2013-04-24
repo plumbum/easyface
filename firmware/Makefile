@@ -42,12 +42,6 @@ HFUSE = 0xD5
 # No bootloader
 EFUSE = 0x01
 
-# MCU name
-#MCU = attiny2313
-#LFUSE = 0xE4
-#HFUSE = 0x9F
-#EFUSE = 0xFF
-
 # Processor frequency.
 #     This will define a symbol, F_CPU, in all source code files equal to the
 #     processor frequency. You can then use this symbol in your source code to
@@ -75,7 +69,8 @@ SRC += helpers.c
 SRC += uart.c
 SRC += fifo.c
 SRC += lcd.c
-SRC += timer.c
+SRC += systimer.c
+SRC += modbus_rtu.c
 
 
 # If there is more than one source file, append them above, or modify and

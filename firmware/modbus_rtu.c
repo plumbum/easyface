@@ -4,45 +4,116 @@
 
 uint16_t fcrc16i(uint16_t crc16, uint8_t data);
 
-int modbusRegisterResponce(BaseChannel* chan, uint8_t devid, uint8_t funcno, int32_t regaddr, int32_t datalen);
-int modbusReadRegister(BaseChannel* chan, uint8_t devid, uint8_t funcno, uint16_t* values, uint16_t len);
 
-
-void modbusInit(modbus_state_t* mb, uint8_t device_id, systimer_t timeout)
+void modbusInit(modbus_t* mb, uint8_t device_id, systimer_t timeout)
 {
     mb->done = 0;
     mb->crc = 0xFFFF;
     mb->timestamp = systimer;
     mb->device_id = device_id;
     mb->timeout = timeout;
-    mb->mb_state = mstWait;
+    mb->state = mstWait;
 }
 
-char modbusProcess(modbus_state_t* mb)
+static int8_t modbusReadByte(uint8_t* b, modbus_t* mb)
 {
-    if(!uartGetReady()) // No data
+    int16_t c = uartGetRxTimeout(mb->timeout);
+    if(c < 0) return c;
+    mb->crc = fcrc16i(mb->crc, c);
+    *b = (uint8_t)c;
+    return 0;
+}
+
+static int8_t modbusReadWord(uint16_t* w, modbus_t* mb)
+{
+    uint16_t word;
+    int16_t c;
+
+    c = uartGetRxTimeout(mb->timeout);
+    if(c < 0) return c;
+    mb->crc = fcrc16i(mb->crc, c);
+    word = ((uint8_t)c)<<8;
+
+    c = uartGetRxTimeout(mb->timeout);
+    if(c < 0) return c;
+    mb->crc = fcrc16i(mb->crc, c);
+    word |= (c & 0xFF);
+
+    *w = word;
+    return 0;
+}
+
+int8_t modbusReadPacket(modbus_t* mb)
+{
+    int8_t st;
+    uint16_t dummy_crc;
+    uint16_t i;
+    uint16_t val;
+    uint8_t len;
+
+    mb->done = 0;
+    mb->crc = 0xFFFF;
+
+    /* Read First byte - device ID */
+    if((st = modbusReadByte(&(mb->devid), mb)) < 0) return st;
+
+    /* Read Second byte - function no */
+    if((st = modbusReadByte(&(mb->funcno), mb)) < 0) return st;
+
+    /* Read Word - register address */
+    if((st = modbusReadWord(&(mb->regaddr), mb)) < 0) return st;
+
+    switch(mb->funcno)
     {
-        if((uint16_t)(mb->systimer - mb->timestamp) > mb->timeout)
-        {
-            // Timeout -> reset state machine
-            mb->mb_state = mstWait;
-            mb->timestamp = systimer;
-            return 0;
-        } else {
-            return 0;
-        }
+        case 1: // (0x01) — чтение значений из нескольких регистров флагов (Read Coil Status)
+            break;
+        case 2: // (0x02) — чтение значений из нескольких дискретных входов (Read Discrete Inputs)
+            break;
+        case 3: // (0x03) — чтение значений из нескольких регистров хранения (Read Holding Registers)
+        case 4: // (0x04) — чтение значений из нескольких регистров ввода (Read Input Registers)
+            if((st = modbusReadWord(&(mb->regcnt), mb)) < 0) return st;
+            break;
+        case 5: // (0x05) — запись значения одного флага (Force Single Coil)
+            break;
+        case 6: // (0x06) — запись значения в один регистр хранения (Preset Single Register)
+            /* Read one register value */
+            if((st = modbusReadWord(&(mb->values[0]), mb)) < 0) return st;
+            break;
+        case 15: // (0x0F) — запись значений в несколько регистров флагов (Force Multiple Coils)
+            break;
+        case 16: // (0x10) — запись значений в несколько регистров хранения (Preset Multiple Registers)
+            /* Read register count */
+            if((st = modbusReadWord(&(mb->regcnt), mb)) < 0) return st;
+            /* Read length in bytes */
+            if((st = modbusReadByte(&len, mb)) < 0) return st;
+            for(i=0; i<mb->regcnt; i++)
+            {
+                if((st = modbusReadWord(&val, mb)) < 0) return st;
+                if(i<MODBUS_VALUES_SIZE)
+                    mb->values[i] = val;
+            }
+            // TODO long packet error
+            break;
     }
 
-    uint8_t c;
-    c = uartGetRx();
+    /* Read CRC */
+    if((st = modbusReadWord(&dummy_crc, mb)) < 0) return st;
 
-    switch(mb->mb_state)
+    if(mb->crc != 0) /* CRC error */
     {
-        case mstWait:
-            break;
+        return MODBUS_ERROR_CRC;
+    }
 
+    if((mb->devid != mb->device_id) /* Not device id */
+        && (mb->devid != 0)) /* Not broadcast address */
+    {
+        return MODBUS_ERROR_DEVID;
+    }
+
+    return MODBUS_OK;
 }
 
+#if 0
 static WORKING_AREA(modbus_thd_wa, 512);
 static msg_t modbus_thd(void *arg)
 {
@@ -266,5 +337,5 @@ int modbusRegisterResponce(BaseChannel* chan, uint8_t devid, uint8_t funcno, int
 
     return 0;
 }
-
+#endif
 

@@ -28,7 +28,7 @@
 #include <util/delay.h>
 
 #include "helpers.h"
-#include "timer.h"
+#include "systimer.h"
 #include "uart.h"
 #include "lcd.h"
 
@@ -71,7 +71,7 @@ int main(void)
         itoa(cnt++, str);
         uartPuts(str);
         uartPuts(" : ");
-        itoa(timer, str);
+        itoa(systimer, str);
         uartPuts(str);
         uartPuts("\r\n");
         _delay_ms(500);
