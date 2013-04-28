@@ -21,10 +21,21 @@
 #include <inttypes.h>
 #include <avr/io.h>
 #include <avr/wdt.h>
+#include <avr/pgmspace.h>
 
 #define WDT_EN 1
 
 #define WRAPEN 1
+
+#ifdef FALSE
+#undef FALSE
+#endif
+#define FALSE (0)
+
+#ifdef TRUE
+#undef TRUE
+#endif
+#define TRUE (~FALSE)
 
 #define PORT_SET(port, bits) { (port) |=  (bits); }
 #define PORT_CLR(port, bits) { (port) &= ~(bits); }
@@ -142,6 +153,7 @@ inline static void SET_DDR(void)
 #   define wdr()
 #endif
 
+void egpio_systimer(void);
 
 #endif   /* ----- #ifndef _CONFIG_H_  ----- */
 

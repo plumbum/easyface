@@ -37,6 +37,8 @@
 #ifndef _LCD_H_
 #define _LCD_H_
 
+#include <inttypes.h>
+
 #define LCD_ROWS 4
 #define LCD_COLS 20
 
@@ -101,8 +103,11 @@ void lcdPutc(char c);
  * Put string to terminal
  * @param ASCIIZ string to print
  */
-void lcdPuts(char* str);
-void lcdPuts_P(char* str);
+void lcdPuts(const char* str);
+void lcdPuts_P(const char* str);
+
+void lcdPutArr(const char* str, unsigned char len);
+void lcdPutWords(const uint16_t* words, uint8_t len);
 
 /*
  * Fake functions ;-)

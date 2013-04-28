@@ -27,14 +27,14 @@ struct modbus_s {
     uint16_t regcnt;
     uint16_t values[MODBUS_VALUES_SIZE];
     uint16_t crc;
-    /* Flags */
-    char done:1;
     /* Config */
     uint8_t device_id;
     systimer_t timeout;
     /* Internal state */
     systimer_t timestamp;
     modbus_state_t state;
+    /* Flags */
+    char done:1;
 };
 
 typedef struct modbus_s modbus_t;
@@ -42,6 +42,8 @@ typedef struct modbus_s modbus_t;
 void modbusInit(modbus_t* mb, uint8_t device_id, systimer_t timeout);
 
 int8_t modbusReadPacket(modbus_t* mb);
+
+void modbusRegisterResponce(modbus_t* mb);
 
 #endif /* _MODBUS_RTU_H_ */
 

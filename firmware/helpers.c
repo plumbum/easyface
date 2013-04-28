@@ -121,6 +121,14 @@ char* uitox(uint32_t val, char* dest, int digits)
     return dest;
 }
 
+char* uctox(unsigned char val, char* dest)
+{
+    *dest++ = _encHex((val>>4) & 0x0F);
+    *dest++ = _encHex((val>>0) & 0x0F);
+    *dest = 0;
+    return dest;
+}
+
 
 /*
 void ERROR(uint8_t no, uint8_t code)

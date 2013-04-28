@@ -71,6 +71,8 @@ SRC += fifo.c
 SRC += lcd.c
 SRC += systimer.c
 SRC += modbus_rtu.c
+SRC += egpio.c
+SRC += keyboard.c
 
 
 # If there is more than one source file, append them above, or modify and

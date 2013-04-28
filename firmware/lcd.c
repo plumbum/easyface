@@ -176,7 +176,7 @@ static inline void _lcd_init(void)
 {
 }
 
-void lcdPuts_P(char* str)
+void lcdPuts_P(const char* str)
 {
     char c;
     while((c = pgm_read_byte(str++)) != 0)
@@ -330,8 +330,31 @@ void lcdPutc(char c)
 }
 #endif
 
+void lcdPutArr(const char* str, uint8_t len)
+{
+    char c;
+    while(len--)
+    {
+        c = *str++;
+        if(c) lcdPutc(c);
+    }
+}
 
-void lcdPuts(char* str)
+void lcdPutWords(const uint16_t* words, uint8_t len)
+{
+    uint16_t w;
+    char c;
+    while(len--)
+    {
+        w = *words++;
+        c = w>>8;
+        if(c) lcdPutc(c);
+        c = w & 0xFF;
+        if(c) lcdPutc(c);
+    }
+}
+
+void lcdPuts(const char* str)
 {
     char c;
     while((c = *str++) != 0)

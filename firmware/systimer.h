@@ -8,5 +8,7 @@ extern volatile systimer_t systimer;
 
 void timerInit(void);
 
+void kbd_systimer(void);
+
 #endif /* _SYSTIMER_H_ */
 

@@ -32,8 +32,8 @@ volatile systimer_t systimer;
 
 ISR(TIMER2_COMPA_vect)
 {
-    PIN_TGL(EXT8);
     systimer++;
+    kbd_systimer();
 }
 
 void timerInit(void)
