@@ -286,23 +286,32 @@ twi_state_t egpioCheckStatus(void)
 
 void egpioInit(void)
 {
+    twi_state_t st;
+
     twiInit();
 
-    /*
-    uint8_t sr;
     do {
-        // if((sr = egpioWriteReg(3, 0xFF)) != 0) break;
-        // if((sr = egpioWriteReg(1, 0xFF)) != 0) break;
-        // if((sr = egpioWriteReg(2, 0x00)) != 0) break;
+        egpioWriteReg(3, 0xFF);
+        while((st = egpioCheckStatus()) == twiStNone) wdr();
+        if(st != twiStDone) break;
+        delay();
+        egpioWriteReg(1, 0xFF);
+        while((st = egpioCheckStatus()) == twiStNone) wdr();
+        if(st != twiStDone) break;
+        delay();
+        egpioWriteReg(2, 0x00);
+        while((st = egpioCheckStatus()) == twiStNone) wdr();
+        delay();
     } while(0);
-    if(sr)
+    if(st != twiStDone)
     {
         char sbuf[8];
         lcdPuts_P(PSTR("Expander fail "));
-        uctox(sr & TW_STATUS_MASK, sbuf);
+        uctox(twi.status, sbuf);
         lcdPuts(sbuf);
         while(1) wdr();
     }
-    */
 }
+
+// vim: sw=4:ts=4:si:et
 

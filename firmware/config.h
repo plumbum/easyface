@@ -106,11 +106,11 @@ inline static void SET_DDR(void)
     PIN_OUT(LCD_RS);
     PIN_OUT(LCD_WR);
 
+    /*
     PIN_CLR(EXT6);
     PIN_OUT(EXT6);
     PIN_CLR(EXT8);
     PIN_OUT(EXT8);
-    /*
     uint8_t _PINB[2] = {0, 0xFF};
     uint8_t _PINC[2] = {0, 0xFF};
     uint8_t _PIND[2] = {0, 0xFF};
@@ -155,5 +155,10 @@ inline static void SET_DDR(void)
 
 void egpio_systimer(void);
 
+
+#define delay() do { \
+    volatile uint8_t __i; \
+    for(__i=0; __i<20; __i++) {} \
+} while(0)
 #endif   /* ----- #ifndef _CONFIG_H_  ----- */
 

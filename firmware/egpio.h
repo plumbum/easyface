@@ -3,6 +3,11 @@
 
 #include "config.h"
 
+#define EGPIO_INPUT     0
+#define EGPIO_OUTPUT    1
+#define EGPIO_POLARITY  2
+#define EGPIO_CONFIG    3
+
 typedef enum {
     twiStNone = 0,
     twiStError,
@@ -45,4 +50,6 @@ twi_state_t egpioCheckStatus(void);
 
 
 #endif /* _EGPIO_H_ */
+
+// vim: sw=4:ts=4:si:et
 
