@@ -26,6 +26,7 @@
 *.lst
 *.lss
 *.map
+*.sym
 tags
 
 # Eagle CAD
