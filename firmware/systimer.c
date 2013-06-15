@@ -45,3 +45,6 @@ void timerInit(void)
     TCCR2B = (0<<WGM02) | (TIMER_CS<<CS00);
     TIMSK2 |= (1<<OCIE2A);
 }
+
+// vim: sw=4:ts=4:si:et
+

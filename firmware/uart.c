@@ -166,3 +166,5 @@ void uartPuts(char* str)
         uartPutTx((uint8_t)c);
 }
 
+// vim: sw=4:ts=4:si:et
+

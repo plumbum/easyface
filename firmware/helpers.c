@@ -250,3 +250,5 @@ static const uint8_t table_crc_lo[] = {
 };
 
 
+// vim: sw=4:ts=4:si:et
+

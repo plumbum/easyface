@@ -84,3 +84,5 @@ fifo_data_t fifoTop(fifo_struct_t* fifo);
 
 #endif /* _FIFO_H_ */
 
+// vim: sw=4:ts=4:si:et
+

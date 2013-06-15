@@ -12,3 +12,5 @@ void kbd_systimer(void);
 
 #endif /* _SYSTIMER_H_ */
 
+// vim: sw=4:ts=4:si:et
+

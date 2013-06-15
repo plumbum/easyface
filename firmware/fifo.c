@@ -57,3 +57,5 @@ fifo_data_t fifoTop(fifo_struct_t* fifo)
         return fifo->buf[fifo->tail];
 }
 
+// vim: sw=4:ts=4:si:et
+

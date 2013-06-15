@@ -35,4 +35,5 @@ int numericLength(int32_t v);
 
 #endif /* _HELPERS_H_ */
 
+// vim: sw=4:ts=4:si:et
 

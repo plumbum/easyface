@@ -63,3 +63,5 @@ void uartPuts(char* str);
 
 #endif   /* ----- #ifndef _UART_H_  ----- */
 
+// vim: sw=4:ts=4:si:et
+
