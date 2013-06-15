@@ -35,6 +35,7 @@
 #include "keyboard.h"
 #include "modbus_rtu.h"
 
+
 #define MODBUS_CMD_MASK  0xE000
 
 #define MODBUS_CMD_LCD   0x0000
@@ -44,7 +45,9 @@
 
 #define MODBUS_CMD_LCDCTRL  0x2000
 
-#define MODBUS_CMD_KEYBOARD 0x4000
+#define MODBUS_CMD_KEYBOARD             0x4000
+#define MODBUS_CMD_KEYBOARD_BUF_SIZE    0x4000
+#define MODBUS_CMD_KEYBOARD_BUF         0x4001
 
 char sbuf[64];
 
@@ -59,29 +62,40 @@ void writeRegister(modbus_t* mb)
         case MODBUS_CMD_LCDCTRL:
             break;
         case MODBUS_CMD_KEYBOARD:
-            egpioWriteReg(mb->regaddr & 0x03, mb->values[0]);
             break;
     }
 }
 
 void readRegister(modbus_t* mb)
 {
-    uint8_t i, j;
+    uint8_t i, v;
     switch(mb->regaddr & MODBUS_CMD_MASK)
     {
         case MODBUS_CMD_LCD:
+            mb->values[0] = mb->regaddr;
+            mb->values[1] = mb->regcnt;
             break;
         case MODBUS_CMD_LCDCTRL:
             break;
         case MODBUS_CMD_KEYBOARD:
-            if(mb->funcno == 4)
+            if(mb->funcno == MODBUS_FUNC_READ_INPUT_REGISTERS)
             {
-                i = mb->regaddr & 0xFF;
-                for(j=0; j<mb->regcnt; j++)
+                switch(mb->regaddr & 0x01)
                 {
-                    mb->values[j] = j+1;
-                    i++;
-                    if(i > 7) i = 0;
+                    case 0x00:
+                        mb->values[0] = fifoUsed(&kbd_scan);
+                        break;
+                    case 0x01:
+                        for(i=0; i<mb->regcnt; i++)
+                        {
+                            if(!fifoEmpty(&kbd_scan))
+                            {
+                                mb->values[i] = fifoPop(&kbd_scan);
+                            } else {
+                                mb->values[i] = 0xFFFF;
+                            }
+                        }
+                        break;
                 }
             }
             break;
@@ -109,72 +123,19 @@ int main(void)
     lcdHome();
     lcdCursor(2);
 
-
-    /*
-    uint8_t sr;
-    sr = egpioWriteReg(3, 0);
-    sr = egpioWriteReg(1, 0xAA);
-    uint8_t val;
-    sr = egpioReadReg(0, &val);
-    */
-
     uartInit(UART19200);
 
-    timerInit();
-    egpioInit();
-    //kbdInit();
     sei();
-
-    twi_state_t st;
-    uint8_t r;
-    do {
-        r = 3;
-        egpioWriteReg(3, 0x00);
-        while((st = egpioCheckStatus()) == twiStNone) wdr();
-        if(st != twiStDone) break;
-        for(i=0; i<100; i++) asm volatile(" nop ");
-        r = 1;
-        egpioWriteReg(1, 0xAA);
-        while((st = egpioCheckStatus()) == twiStNone) wdr();
-        if(st != twiStDone) break;
-        for(i=0; i<100; i++) asm volatile(" nop ");
-        r = 2;
-        egpioReadReg(0);
-        while((st = egpioCheckStatus()) == twiStNone) wdr();
-        if(st != twiStDone) break;
-    } while(0);
-
-    lcdGoto(0, 0);
-    switch(st)
-    {
-        case twiStDone:
-            lcdPuts_P(PSTR("I2C done "));
-            break;
-        case twiStError:
-            lcdPuts_P(PSTR("I2C error "));
-            break;
-        default:
-            lcdPuts_P(PSTR("I2C unknow "));
-            break;
-    }
-    uctox(r, sbuf);
-    lcdPuts(sbuf);
-    lcdPutc(' ');
-    uctox(twi.status, sbuf);
-    lcdPuts(sbuf);
-    lcdPutc(' ');
-    uctox(twi.reg_value, sbuf);
-    lcdPuts(sbuf);
-
-    while(1)
-    {
-        wdr();
-    }
+    egpioInit();
+    kbdInit();
+    timerInit();
 
     modbusInit(&modbus, 0x01, 50);
 
     while(1)
     {
+        wdr();
+
         int8_t r = modbusReadPacket(&modbus);
         if(r == MODBUS_OK)
         {
@@ -201,21 +162,8 @@ int main(void)
                     modbusRegisterResponce(&modbus);
                     break;
             }
-        }
 
-        kbdProcess();
-
-        lcdGoto(0, 0);
-        uctox(kbd_scancode, sbuf);
-        lcdPuts(sbuf);
-        /*
-        for(i=0; i<8; i++)
-        {
-            uctox(kbd_buffer[i], sbuf);
-            lcdPuts(sbuf);
-            lcdPutc(':');
         }
-        */
     }
 
     return 0;

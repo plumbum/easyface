@@ -361,4 +361,19 @@ void lcdPuts(const char* str)
         lcdPutc(c);
 }
 
+static char _to_hex(uint8_t v)
+{
+    if(v < 10)
+        return v + '0';
+    else
+        return (v-10) + 'A';
+}
+
+void lcdPutHex(uint8_t v)
+{
+    lcdPutc(_to_hex(v>>4));
+    lcdPutc(_to_hex(v&0x0F));
+}
+
+// vim: sw=4:ts=4:si:et
 

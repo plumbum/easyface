@@ -109,6 +109,8 @@ void lcdPuts_P(const char* str);
 void lcdPutArr(const char* str, unsigned char len);
 void lcdPutWords(const uint16_t* words, uint8_t len);
 
+void lcdPutHex(uint8_t v);
+
 /*
  * Fake functions ;-)
  */
@@ -124,4 +126,6 @@ void lcdPutWords(const uint16_t* words, uint8_t len);
 
 
 #endif /* _LCD_H_ */
+
+// vim: sw=4:ts=4:si:et
 

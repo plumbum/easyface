@@ -173,3 +173,5 @@ void modbusRegisterResponce(modbus_t* mb)
     modbusWriteCrc(mb);
 }
 
+// vim: sw=4:ts=4:si:et
+
