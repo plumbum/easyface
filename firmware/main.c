@@ -36,32 +36,64 @@
 #include "modbus_rtu.h"
 
 
-#define MODBUS_CMD_MASK  0xE000
+#define MB_SEGMENT_MASK         0xE000
 
-#define MODBUS_CMD_LCD   0x0000
-#define MODBUS_LCD_COL   0x007F
-#define MODBUS_LCD_ROW   0x1F80
-#define MODBUS_LCD_MASK  (MODBUS_LCD_COL | MODBUS_LCD_ROW)
+#define MB_LCD_DATA             0x0000
+#define MB_LCD_COL              0x007F
+#define MB_LCD_ROW              0x1F80
+#define MB_LCD_POS_MASK         (MB_LCD_COL | MB_LCD_ROW)
 
-#define MODBUS_CMD_LCDCTRL  0x2000
+/* Configuration registers */
+#define MB_CONFIG               0x2000
+#define MB_CONFIG_LCD_POS       0x00
+#define MB_CONFIG_LCD_CURSOR    0x01
+#define MB_CONFIG_LCD_LIGHT     0x02
+#define MB_CONFIG_LCD_CLEAR     0x03
 
-#define MODBUS_CMD_KEYBOARD             0x4000
-#define MODBUS_CMD_KEYBOARD_BUF_SIZE    0x4000
-#define MODBUS_CMD_KEYBOARD_BUF         0x4001
+/* Read keyboard scancode FIFO */
+#define MB_KEYBOARD             0x2800
+#define MB_KEYBOARD_BUF_SIZE    0x00
+#define MB_KEYBOARD_BUF         0x01
 
-char sbuf[64];
+void writeConfigRegister(uint16_t addr, uint16_t val)
+{
+    switch(addr)
+    {
+        case MB_CONFIG_LCD_POS:
+            lcdGoto(val>>8, val&0xFF);
+            break;
+        case MB_CONFIG_LCD_CURSOR:
+            lcdCursor(val & 0x03);
+            break;
+        case MB_CONFIG_LCD_LIGHT:
+            lcdBackLight(val & 0xFF);
+            break;
+        case MB_CONFIG_LCD_CLEAR:
+            lcdClr();
+            break;
+    }
+}
 
 void writeRegister(modbus_t* mb)
 {
-    switch(mb->regaddr & MODBUS_CMD_MASK)
+    switch(mb->regaddr & MB_SEGMENT_MASK)
     {
-        case MODBUS_CMD_LCD:
-            lcdGoto((mb->regaddr>>7)&0x3F, mb->regaddr&0x7F);
-            lcdPutArr((char*)mb->values, mb->regcnt*2);
+        case MB_LCD_DATA:
+            {
+                lcdGoto(((mb->regaddr>>7)&0x3F), (mb->regaddr&0x7F));
+                lcdPutArr((char*)mb->values, mb->regcnt*2);
+            }
             break;
-        case MODBUS_CMD_LCDCTRL:
-            break;
-        case MODBUS_CMD_KEYBOARD:
+        case MB_CONFIG:
+            {
+                uint8_t i;
+                uint16_t addr = (mb->regaddr & 0x0FFF);
+                for(i=0; i<mb->regcnt; i++)
+                {
+                    writeConfigRegister(addr, mb->values[i]);
+                    addr++;
+                }
+            }
             break;
     }
 }
@@ -69,23 +101,24 @@ void writeRegister(modbus_t* mb)
 void readRegister(modbus_t* mb)
 {
     uint8_t i, v;
-    switch(mb->regaddr & MODBUS_CMD_MASK)
+    switch(mb->regaddr & MB_SEGMENT_MASK)
     {
-        case MODBUS_CMD_LCD:
-            mb->values[0] = mb->regaddr;
-            mb->values[1] = mb->regcnt;
+        case MB_LCD_DATA:
+            if(mb->funcno == MODBUS_FUNC_READ_HOLDING_REGISTERS)
+            {
+            }
             break;
-        case MODBUS_CMD_LCDCTRL:
+        case MB_CONFIG:
             break;
-        case MODBUS_CMD_KEYBOARD:
+        case MB_KEYBOARD:
             if(mb->funcno == MODBUS_FUNC_READ_INPUT_REGISTERS)
             {
-                switch(mb->regaddr & 0x01)
+                switch(mb->regaddr & 0x0F)
                 {
-                    case 0x00:
+                    case MB_KEYBOARD_BUF_SIZE:
                         mb->values[0] = fifoUsed(&kbd_scan);
                         break;
-                    case 0x01:
+                    case MB_KEYBOARD_BUF:
                         for(i=0; i<mb->regcnt; i++)
                         {
                             if(!fifoEmpty(&kbd_scan))
@@ -141,23 +174,17 @@ int main(void)
         {
             switch(modbus.funcno)
             {
-                case 3:
-                    for(i=0; i<modbus.regcnt; i++)
-                    {
-                        modbus.values[i] = i*10;
-                    }
-                    modbusRegisterResponce(&modbus);
-                    break;
-                case 4:
+                case MODBUS_FUNC_READ_HOLDING_REGISTERS:
+                case MODBUS_FUNC_READ_INPUT_REGISTERS:
                     readRegister(&modbus);
                     modbusRegisterResponce(&modbus);
                     break;
-                case 5:
-                case 15:
+                case MODBUS_FUNC_FORCE_SINGLE_COIL:
+                case MODBUS_FUNC_FORCE_MULTIPLE_COILS:
                     modbusRegisterResponce(&modbus);
                     break;
-                case 6:
-                case 16:
+                case MODBUS_FUNC_PRESET_SINGLE_REGISTER:
+                case MODBUS_FUNC_PRESET_MULTIPLE_REGISTERS:
                     writeRegister(&modbus);
                     modbusRegisterResponce(&modbus);
                     break;
